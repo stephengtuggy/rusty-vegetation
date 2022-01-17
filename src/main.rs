@@ -38,7 +38,7 @@ const VERTICES: &[Vertex] = &[
 
 const INDICES: &[u16] = &[
     0, 1, 2,
-    /* padding */ 0,
+    /* padding */ 2,
 ];
 
 struct State {
