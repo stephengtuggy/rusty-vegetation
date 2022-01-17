@@ -1,6 +1,8 @@
 #[macro_use] extern crate random_number;
 
 use std::iter;
+use std::env;
+use std::str::FromStr;
 use std::vec::Vec;
 use cgmath::num_traits::Pow;
 use is_odd::IsOdd;
@@ -35,17 +37,6 @@ impl Vertex {
 const GREEN: [f32; 3] = [0.0, 1.0, 0.0];
 const BROWN: [f32; 3] = [0.5, 0.5, 0.0];
 
-// const VERTICES: &[Vertex] = &[
-//     Vertex { position: [-0.7, 0.0, 0.0], color: BLUE },
-//     Vertex { position: [0.0, 0.7, 0.0], color: BLUE },
-//     Vertex { position: [0.7, 0.0, 0.0], color: BLUE },
-// ];
-//
-// const INDICES: &[u16] = &[
-//     0, 1, 2,
-//     /* padding */ 2,
-// ];
-
 const X_SCALE: f32 = 1.0f32 / 256.0f32;
 const Y_SCALE: f32 = 1.0f32 / 256.0f32;
 
@@ -74,7 +65,7 @@ const GROWTH_DIRECTIONS: [GrowthDirection; 8] = [
 
 struct Tree {
     vertices: Vec<Vertex>,
-    indices: Vec<u16>,
+    indices: Vec<u32>,
 }
 
 impl Tree {
@@ -106,14 +97,10 @@ struct TreeGenerator {
 
 impl TreeGenerator {
     pub fn new (fractal_level: u8, completeness_factor: u8, num_trees: u16) -> Self {
-        // let vertices: &mut vec_deque<Vertex> = vec_deque::new();
-        // let indices: &mut vec_deque<u16> = vec_deque::new();
         Self {
             fractal_level,
             completeness_factor,
             num_trees,
-            // vertices,
-            // indices,
         }
     }
 
@@ -123,8 +110,6 @@ impl TreeGenerator {
                      start_y: f32,
                      completeness_factor: u8,
                      direction: GrowthDirection) {
-        // let mut tree = Tree::new();
-
         let end_x: f32;
         let end_y: f32;
 
@@ -170,10 +155,10 @@ impl TreeGenerator {
 
         let vertex_start: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
         tree.vertices.push(vertex_start);
-        tree.indices.push((tree.vertices.len() - 1) as u16);
+        tree.indices.push((tree.vertices.len() - 1) as u32);
         let vertex_end: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
         tree.vertices.push(vertex_end);
-        tree.indices.push((tree.vertices.len() - 1) as u16);
+        tree.indices.push((tree.vertices.len() - 1) as u32);
 
         if fractal_level > 0u8 {
             for i in GROWTH_DIRECTIONS {
@@ -193,12 +178,9 @@ impl TreeGenerator {
             let mut tree = Tree::new();
             TreeGenerator::generate_tree(&mut tree, self.fractal_level, x, 0.0f32, self.completeness_factor, GrowthDirection::Up);
 
-            if (tree.indices.len() as u64).is_odd() {
-                tree.indices.push(*tree.indices.last().unwrap());
-            }
-
-            // tree.vertices.make_contiguous();
-            // tree.indices.make_contiguous();
+            // if (tree.indices.len() as u64).is_odd() {
+            //     tree.indices.push(*tree.indices.last().unwrap());
+            // }
 
             forest.trees.push(tree);
         }
@@ -220,7 +202,7 @@ struct State {
 }
 
 impl State {
-    async fn new(window: &Window) -> Self {
+    async fn new(window: &Window, tree_generator: &mut TreeGenerator) -> Self {
         let size = window.inner_size();
 
         // The instance is a handle to our GPU
@@ -304,7 +286,7 @@ impl State {
             multiview: None,
         });
 
-        let mut tree_generator = TreeGenerator::new(8u8, 192u8, 1u16);
+        // let mut tree_generator = TreeGenerator::new(8u8, 192u8, 1u16);
         let forest = tree_generator.generate_forest();
         let trees = forest.trees;
 
@@ -397,11 +379,18 @@ impl State {
 
 fn main() {
     env_logger::init();
+
+    let args: Vec<String> = env::args().collect();
+    let num_trees = u16::from_str(&args[1]).unwrap();
+    let completeness_factor = u8::from_str(&args[2]).unwrap();
+    let fractal_level = u8::from_str(&args[3]).unwrap();
+    let mut tree_generator = TreeGenerator::new(fractal_level, completeness_factor, num_trees);
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
     // State::new uses async code, so we're going to wait for it to finish
-    let mut state: State = pollster::block_on(State::new(&window));
+    let mut state: State = pollster::block_on(State::new(&window, &mut tree_generator));
 
     event_loop.run(move |event, _, control_flow| {
         match event {
