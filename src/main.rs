@@ -1,4 +1,5 @@
 use std::iter;
+use wgpu::IndexFormat;
 
 use winit::{
     event::*,
@@ -30,16 +31,15 @@ impl Vertex {
 const BLUE: [f32; 3] = [0.0, 0.0, 1.0];
 
 const VERTICES: &[Vertex] = &[
-    Vertex { position: [0.0, 1.0, 0.0], color: BLUE },
-    Vertex { position: [-1.0, 0.0, 0.0], color: BLUE },
-    Vertex { position: [1.0, 0.0, 0.0], color: BLUE },
+    Vertex { position: [-0.7, 0.0, 0.0], color: BLUE },
+    Vertex { position: [0.0, 0.7, 0.0], color: BLUE },
+    Vertex { position: [0.7, 0.0, 0.0], color: BLUE },
 ];
 
 const INDICES: &[u16] = &[
     0, 1, 2,
-    /* padding */ 0,
+    /* padding */ 2,
 ];
-
 
 struct State {
     surface: wgpu::Surface,
@@ -108,19 +108,19 @@ impl State {
                     Vertex::desc(),
                 ],
             },
-            fragment: Some(wgpu::FragmentState { // 3.
+            fragment: Some(wgpu::FragmentState {
                 module: &shader,
                 entry_point: "fs_main",
-                targets: &[wgpu::ColorTargetState { // 4.
+                targets: &[wgpu::ColorTargetState {
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
                 }],
             }),
             primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList, // 1.
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw, // 2.
+                topology: wgpu::PrimitiveTopology::LineStrip,
+                strip_index_format: Some(IndexFormat::Uint16),
+                front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
                 // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
                 polygon_mode: wgpu::PolygonMode::Fill,
@@ -129,13 +129,13 @@ impl State {
                 // Requires Features::CONSERVATIVE_RASTERIZATION
                 conservative: false,
             },
-            depth_stencil: None, // 1.
+            depth_stencil: None,
             multisample: wgpu::MultisampleState {
-                count: 1, // 2.
-                mask: !0, // 3.
-                alpha_to_coverage_enabled: false, // 4.
+                count: 1,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
             },
-            multiview: None, // 5.
+            multiview: None,
         });
 
         let vertex_buffer = device.create_buffer_init(
