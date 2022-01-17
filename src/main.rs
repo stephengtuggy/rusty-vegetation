@@ -35,7 +35,7 @@ impl Vertex {
 }
 
 const GREEN: [f32; 3] = [0.0, 1.0, 0.0];
-const BROWN: [f32; 3] = [0.5, 0.5, 0.0];
+const BROWN: [f32; 3] = [0.25, 0.25, 0.0];
 
 const X_SCALE: f32 = 1.0f32 / 256.0f32;
 const Y_SCALE: f32 = 1.0f32 / 256.0f32;
@@ -105,7 +105,7 @@ impl TreeGenerator {
     }
 
     pub fn generate_tree(tree: &mut Tree,
-                     fractal_level: u8,
+                     fractal_level: u32,
                      start_x: f32,
                      start_y: f32,
                      completeness_factor: u8,
@@ -149,18 +149,18 @@ impl TreeGenerator {
         }
 
         let mut color: [f32; 3] = BROWN;
-        if fractal_level == 0u8 {
+        if fractal_level == 0 {
             color = GREEN;
         }
 
         let vertex_start: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
         tree.vertices.push(vertex_start);
         tree.indices.push((tree.vertices.len() - 1) as u32);
-        let vertex_end: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
+        let vertex_end: Vertex = Vertex { position: [end_x, end_y, 0.0f32], color };
         tree.vertices.push(vertex_end);
         tree.indices.push((tree.vertices.len() - 1) as u32);
 
-        if fractal_level > 0u8 {
+        if fractal_level > 0 {
             for i in GROWTH_DIRECTIONS {
                 let n: u8 = random!();
                 if (i as u32 != direction as u32) && (n < completeness_factor) {
@@ -176,7 +176,7 @@ impl TreeGenerator {
         for i in 0u16..self.num_trees {
             let x: f32 = 0.0f32; //random!(-1.0..=1.0);
             let mut tree = Tree::new();
-            TreeGenerator::generate_tree(&mut tree, self.fractal_level, x, 0.0f32, self.completeness_factor, GrowthDirection::Up);
+            TreeGenerator::generate_tree(&mut tree, self.fractal_level as u32, x, 0.0f32, self.completeness_factor, GrowthDirection::Up);
 
             // if (tree.indices.len() as u64).is_odd() {
             //     tree.indices.push(*tree.indices.last().unwrap());
