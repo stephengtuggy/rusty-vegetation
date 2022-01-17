@@ -14,3 +14,5 @@ log = "0.4"
 wgpu = "0.12"
 pollster = "0.2"
 bytemuck = { version = "1.4", features = [ "derive" ] }
+random-number = "0.1.6"
+is-odd = "1.0.0"

@@ -1,5 +1,11 @@
+#[macro_use] extern crate random_number;
+
 use std::iter;
-use wgpu::IndexFormat;
+use std::vec::Vec;
+// use std::iter::Step;
+use cgmath::num_traits::Pow;
+use is_odd::IsOdd;
+// use wgpu::IndexFormat;
 
 use winit::{
     event::*,
@@ -28,18 +34,180 @@ impl Vertex {
     }
 }
 
-const BLUE: [f32; 3] = [0.0, 0.0, 1.0];
+const GREEN: [f32; 3] = [0.0, 1.0, 0.0];
+const BROWN: [f32; 3] = [0.5, 0.5, 0.0];
 
-const VERTICES: &[Vertex] = &[
-    Vertex { position: [-0.7, 0.0, 0.0], color: BLUE },
-    Vertex { position: [0.0, 0.7, 0.0], color: BLUE },
-    Vertex { position: [0.7, 0.0, 0.0], color: BLUE },
+// const VERTICES: &[Vertex] = &[
+//     Vertex { position: [-0.7, 0.0, 0.0], color: BLUE },
+//     Vertex { position: [0.0, 0.7, 0.0], color: BLUE },
+//     Vertex { position: [0.7, 0.0, 0.0], color: BLUE },
+// ];
+//
+// const INDICES: &[u16] = &[
+//     0, 1, 2,
+//     /* padding */ 2,
+// ];
+
+const X_SCALE: f32 = 1.0f32 / 25.0f32;
+const Y_SCALE: f32 = 1.0f32 / 25.0f32;
+
+#[derive(Clone, Copy)]
+enum GrowthDirection {
+    Left = 0,
+    UpperLeft = 1,
+    Up = 2,
+    UpperRight = 3,
+    Right = 4,
+    LowerRight = 5,
+    Down = 6,
+    LowerLeft = 7,
+}
+
+const GROWTH_DIRECTIONS: [GrowthDirection; 8] = [
+    GrowthDirection::Left,
+    GrowthDirection::UpperLeft,
+    GrowthDirection::Up,
+    GrowthDirection::UpperRight,
+    GrowthDirection::Right,
+    GrowthDirection::LowerRight,
+    GrowthDirection::Down,
+    GrowthDirection::LowerLeft,
 ];
 
-const INDICES: &[u16] = &[
-    0, 1, 2,
-    /* padding */ 2,
-];
+struct Tree {
+    vertices: Vec<Vertex>,
+    indices: Vec<u16>,
+}
+
+impl Tree {
+    pub fn new() -> Self {
+        Self {
+            vertices: Vec::new(),
+            indices: Vec::new(),
+        }
+    }
+}
+
+struct Forest {
+    trees: Vec<Tree>,
+}
+
+impl Forest {
+    pub fn new() -> Self {
+        Self {
+            trees: Vec::new(),
+        }
+    }
+}
+
+struct TreeGenerator {
+    fractal_level: u8,
+    completeness_factor: u8,
+    num_trees: u16,
+}
+
+impl TreeGenerator {
+    pub fn new (fractal_level: u8, completeness_factor: u8, num_trees: u16) -> Self {
+        // let vertices: &mut vec_deque<Vertex> = vec_deque::new();
+        // let indices: &mut vec_deque<u16> = vec_deque::new();
+        Self {
+            fractal_level,
+            completeness_factor,
+            num_trees,
+            // vertices,
+            // indices,
+        }
+    }
+
+    pub fn generate_tree(tree: &mut Tree,
+                     fractal_level: u8,
+                     start_x: f32,
+                     start_y: f32,
+                     completeness_factor: u8,
+                     direction: GrowthDirection) {
+        // let mut tree = Tree::new();
+
+        let end_x: f32;
+        let end_y: f32;
+
+        match direction {
+            GrowthDirection::Left => {
+                end_x = start_x - X_SCALE * 2f32.pow(fractal_level);
+                end_y = start_y;
+            }
+            GrowthDirection::UpperLeft => {
+                end_x = start_x - X_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+                end_y = start_y - Y_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+            }
+            GrowthDirection::Up => {
+                end_x = start_x;
+                end_y = start_y - Y_SCALE * 2f32.pow(fractal_level);
+            }
+            GrowthDirection::UpperRight => {
+                end_x = start_x + X_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+                end_y = start_y - Y_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+            }
+            GrowthDirection::Right => {
+                end_x = start_x + X_SCALE * 2f32.pow(fractal_level);
+                end_y = start_y;
+            }
+            GrowthDirection::LowerRight => {
+                end_x = start_x + X_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+                end_y = start_y + Y_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+            }
+            GrowthDirection::Down => {
+                end_x = start_x;
+                end_y = start_y + Y_SCALE * 2f32.pow(fractal_level);
+            }
+            GrowthDirection::LowerLeft => {
+                end_x = start_x - X_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+                end_y = start_y + Y_SCALE * f32::sqrt(2f32.pow(fractal_level * 2) / 2f32);
+            }
+        }
+
+        let mut color: [f32; 3] = BROWN;
+        if fractal_level == 0u8 {
+            color = GREEN;
+        }
+
+        let vertex_start: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
+        tree.vertices.push(vertex_start);
+        tree.indices.push((tree.vertices.len() - 1) as u16);
+        let vertex_end: Vertex = Vertex { position: [start_x, start_y, 0.0f32], color };
+        tree.vertices.push(vertex_end);
+        tree.indices.push((tree.vertices.len() - 1) as u16);
+
+        if fractal_level > 0u8 {
+            for i in GROWTH_DIRECTIONS {
+                let n: u8 = random!();
+                if (i as u32 != direction as u32) && (n < completeness_factor) {
+                    TreeGenerator::generate_tree(tree, fractal_level - 1, end_x, end_y, completeness_factor, i);
+                }
+            }
+        }
+    }
+
+    pub fn generate_forest(&mut self) -> Forest {
+        let mut forest = Forest::new();
+
+        for i in 0u16..self.num_trees {
+            let x: f32 = random!(-1.0..=1.0);
+            let mut tree = Tree::new();
+            TreeGenerator::generate_tree(&mut tree, self.fractal_level, x, 0.0, self.completeness_factor, GrowthDirection::Up);
+
+            if (tree.indices.len() as u64).is_odd() {
+                tree.indices.push(*tree.indices.last().unwrap());
+            }
+
+            // tree.vertices.make_contiguous();
+            // tree.indices.make_contiguous();
+
+            forest.trees.push(tree);
+        }
+
+        forest
+    }
+}
 
 struct State {
     surface: wgpu::Surface,
@@ -118,8 +286,8 @@ impl State {
                 }],
             }),
             primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::LineStrip,
-                strip_index_format: Some(IndexFormat::Uint16),
+                topology: wgpu::PrimitiveTopology::LineList,
+                strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
                 cull_mode: Some(wgpu::Face::Back),
                 // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
@@ -138,21 +306,25 @@ impl State {
             multiview: None,
         });
 
+        let mut tree_generator = TreeGenerator::new(3, 192, 4);
+        let forest = tree_generator.generate_forest();
+        let trees = forest.trees;
+
         let vertex_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(VERTICES),
+                contents: bytemuck::cast_slice(&(trees[0].vertices)),
                 usage: wgpu::BufferUsages::VERTEX,
             }
         );
         let index_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(INDICES),
+                contents: bytemuck::cast_slice(&(trees[0].indices)),
                 usage: wgpu::BufferUsages::INDEX,
             }
         );
-        let num_indices = INDICES.len() as u32;
+        let num_indices = trees[0].indices.len() as u32;
 
         Self {
             surface,
