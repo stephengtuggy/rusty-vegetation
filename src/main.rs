@@ -2,10 +2,8 @@
 
 use std::iter;
 use std::vec::Vec;
-// use std::iter::Step;
 use cgmath::num_traits::Pow;
 use is_odd::IsOdd;
-// use wgpu::IndexFormat;
 
 use winit::{
     event::*,
@@ -48,8 +46,8 @@ const BROWN: [f32; 3] = [0.5, 0.5, 0.0];
 //     /* padding */ 2,
 // ];
 
-const X_SCALE: f32 = 1.0f32 / 25.0f32;
-const Y_SCALE: f32 = 1.0f32 / 25.0f32;
+const X_SCALE: f32 = 1.0f32 / 256.0f32;
+const Y_SCALE: f32 = 1.0f32 / 256.0f32;
 
 #[derive(Clone, Copy)]
 enum GrowthDirection {
@@ -191,9 +189,9 @@ impl TreeGenerator {
         let mut forest = Forest::new();
 
         for i in 0u16..self.num_trees {
-            let x: f32 = random!(-1.0..=1.0);
+            let x: f32 = 0.0f32; //random!(-1.0..=1.0);
             let mut tree = Tree::new();
-            TreeGenerator::generate_tree(&mut tree, self.fractal_level, x, 0.0, self.completeness_factor, GrowthDirection::Up);
+            TreeGenerator::generate_tree(&mut tree, self.fractal_level, x, 0.0f32, self.completeness_factor, GrowthDirection::Up);
 
             if (tree.indices.len() as u64).is_odd() {
                 tree.indices.push(*tree.indices.last().unwrap());
@@ -306,7 +304,7 @@ impl State {
             multiview: None,
         });
 
-        let mut tree_generator = TreeGenerator::new(3, 192, 4);
+        let mut tree_generator = TreeGenerator::new(8u8, 192u8, 1u16);
         let forest = tree_generator.generate_forest();
         let trees = forest.trees;
 
