@@ -25,7 +25,7 @@ cargo install --path .
 4. Run the program:
 
 ```bash
-rusty-vegetation 1 75 7
+rusty-vegetation 1 75 9 0.000651041666667 0.0009765625
 ```
 
 ### On Windows:
@@ -42,5 +42,5 @@ cargo install --path .
 4. Run the program:
 
 ```PowerShell
-rusty-vegetation 1 75 7
+rusty-vegetation 1 75 9 0.000651041666667 0.0009765625
 ```
