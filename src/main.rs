@@ -36,9 +36,6 @@ impl Vertex {
 const GREEN: [f32; 3] = [0.0, 1.0, 0.0];
 const BROWN: [f32; 3] = [0.25, 0.25, 0.0];
 
-const X_SCALE: f32 = 1.0f32 / 384.0f32;
-const Y_SCALE: f32 = 1.0f32 / 256.0f32;
-
 #[derive(Clone, Copy)]
 enum GrowthDirection {
     Left = 0,
@@ -90,16 +87,20 @@ impl Forest {
 
 struct TreeGenerator {
     fractal_level: u8,
-    completeness_factor: u8,
+    fill_factor: u8,
     num_trees: u16,
+    horizontal_scale: f32,
+    vertical_scale: f32,
 }
 
 impl TreeGenerator {
-    pub fn new (fractal_level: u8, completeness_factor: u8, num_trees: u16) -> Self {
+    pub fn new (fractal_level: u8, fill_factor: u8, num_trees: u16, horizontal_scale: f32, vertical_scale: f32) -> Self {
         Self {
             fractal_level,
-            completeness_factor,
+            fill_factor,
             num_trees,
+            horizontal_scale,
+            vertical_scale,
         }
     }
 
@@ -107,43 +108,45 @@ impl TreeGenerator {
                          fractal_level: u32,
                          start_x: f32,
                          start_y: f32,
-                         completeness_factor: u8,
-                         direction: GrowthDirection) {
+                         fill_factor: u8,
+                         direction: GrowthDirection,
+                         horizontal_scale: f32,
+                         vertical_scale: f32) {
         let end_x: f32;
         let end_y: f32;
 
         match direction {
             GrowthDirection::Left => {
-                end_x = start_x - X_SCALE * Pow::pow(2u32, fractal_level) as f32;
+                end_x = start_x - horizontal_scale * Pow::pow(2u32, fractal_level) as f32;
                 end_y = start_y;
             }
             GrowthDirection::UpperLeft => {
-                end_x = start_x - X_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
-                end_y = start_y + Y_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_x = start_x - horizontal_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_y = start_y + vertical_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
             }
             GrowthDirection::Up => {
                 end_x = start_x;
-                end_y = start_y + Y_SCALE * Pow::pow(2u32, fractal_level) as f32;
+                end_y = start_y + vertical_scale * Pow::pow(2u32, fractal_level) as f32;
             }
             GrowthDirection::UpperRight => {
-                end_x = start_x + X_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
-                end_y = start_y + Y_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_x = start_x + horizontal_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_y = start_y + vertical_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
             }
             GrowthDirection::Right => {
-                end_x = start_x + X_SCALE * Pow::pow(2u32, fractal_level) as f32;
+                end_x = start_x + horizontal_scale * Pow::pow(2u32, fractal_level) as f32;
                 end_y = start_y;
             }
             GrowthDirection::LowerRight => {
-                end_x = start_x + X_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
-                end_y = start_y - Y_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_x = start_x + horizontal_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_y = start_y - vertical_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
             }
             GrowthDirection::Down => {
                 end_x = start_x;
-                end_y = start_y - Y_SCALE * Pow::pow(2u32, fractal_level) as f32;
+                end_y = start_y - vertical_scale * Pow::pow(2u32, fractal_level) as f32;
             }
             GrowthDirection::LowerLeft => {
-                end_x = start_x - X_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
-                end_y = start_y - Y_SCALE * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_x = start_x - horizontal_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
+                end_y = start_y - vertical_scale * f32::sqrt(Pow::pow(2u32, fractal_level * 2u32) as f32 / 2f32);
             }
         }
 
@@ -162,8 +165,8 @@ impl TreeGenerator {
         if fractal_level > 0 {
             for i in GROWTH_DIRECTIONS {
                 let n: u8 = random!(0..100);
-                if (((i as u32) + 4) % 8 != direction as u32) && (n < completeness_factor) {
-                    TreeGenerator::generate_tree(tree, fractal_level - 1, end_x, end_y, completeness_factor, i);
+                if (((i as u32) + 4) % 8 != direction as u32) && (n < fill_factor) {
+                    TreeGenerator::generate_tree(tree, fractal_level - 1, end_x, end_y, fill_factor, i, horizontal_scale, vertical_scale);
                 }
             }
         }
@@ -175,7 +178,7 @@ impl TreeGenerator {
         for i in 0u16..self.num_trees {
             let x: f32 = 0.0f32; //random!(-1.0..=1.0);
             let mut tree = Tree::new();
-            TreeGenerator::generate_tree(&mut tree, self.fractal_level as u32, x, 0.0f32, self.completeness_factor, GrowthDirection::Up);
+            TreeGenerator::generate_tree(&mut tree, self.fractal_level as u32, x, 0.0f32, self.fill_factor, GrowthDirection::Up, self.horizontal_scale, self.vertical_scale);
 
             forest.trees.push(tree);
         }
@@ -379,7 +382,9 @@ fn main() {
     let num_trees = u16::from_str(&args[1]).unwrap();
     let completeness_factor = u8::from_str(&args[2]).unwrap();
     let fractal_level = u8::from_str(&args[3]).unwrap();
-    let mut tree_generator = TreeGenerator::new(fractal_level, completeness_factor, num_trees);
+    let horizontal_scale = f32::from_str(&args[4]).unwrap();
+    let vertical_scale = f32::from_str(&args[5]).unwrap();
+    let mut tree_generator = TreeGenerator::new(fractal_level, completeness_factor, num_trees, horizontal_scale, vertical_scale);
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
