@@ -25,7 +25,7 @@ cargo install --path .
 4. Run the program:
 
 ```bash
-rusty-vegetation 1 75 7
+rusty-vegetation 1 75 9 0.000651041666667 0.0009765625
 ```
 
 ### On Windows:
@@ -42,5 +42,15 @@ cargo install --path .
 4. Run the program:
 
 ```PowerShell
-rusty-vegetation 1 75 7
+rusty-vegetation 1 75 9 0.000651041666667 0.0009765625
 ```
+
+## Command-Line Arguments
+
+The command-line arguments to the program are, in order:
+
+- The number of trees to generate (effectively limited to 1 at this point)
+- The percentage fill factor to use (0-100)
+- The fractal level to use (7-9 is a good range)
+- The horizontal scaling factor to use (try 1 / 1536, or 0.000651041666667)
+- The vertical scaling factor (try 1 / 1024, or 0.0009765625)
