@@ -5,6 +5,7 @@ use std::env;
 use std::str::FromStr;
 use std::vec::Vec;
 use cgmath::num_traits::Pow;
+use wgpu::TextureFormat;
 
 use winit::{
     event::*,
@@ -205,8 +206,11 @@ impl State {
 
         // The instance is a handle to our GPU
         // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
-        let instance = wgpu::Instance::new(wgpu::Backends::all());
-        let surface = unsafe { instance.create_surface(window) };
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::all(),
+            dx12_shader_compiler: wgpu::Dx12Compiler::Fxc,
+        });
+        let surface = unsafe { instance.create_surface(window) }.expect("Error creating a surface");
         let adapter = instance.request_adapter(
             &wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -224,13 +228,18 @@ impl State {
             None,   // Trace path
         ).await.unwrap();
 
+        // let caps = surface.get_capabilities(&adapter);
+        // let formats = caps.formats;
+        // let present_modes = caps.present_modes;
+        // let alpha_modes = caps.alpha_modes;
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface.get_supported_formats(&adapter)[0],
+            format: TextureFormat::Bgra8UnormSrgb,
             width: size.width,
             height: size.height,
             present_mode: wgpu::PresentMode::Fifo,
-            alpha_mode: wgpu::CompositeAlphaMode::Opaque,
+            alpha_mode: wgpu::CompositeAlphaMode::Auto,
+            view_formats: vec![TextureFormat::Bgra8UnormSrgb,],
         };
         surface.configure(&device, &config);
 
