@@ -2113,9 +2113,9 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.15.1"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a321d5436275e62be2d1ebb87991486fb3a561823656beb5410571500972cc65"
+checksum = "32444e121b0bd00cb02c0de32fde457a9491bd44e03e7a5db6df9b1da2f6f110"
 dependencies = [
  "bitflags",
  "js-sys",
