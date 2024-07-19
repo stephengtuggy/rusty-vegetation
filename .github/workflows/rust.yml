@@ -27,7 +27,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo apt-get update
-        sudo apt-get install fontconfig
+        sudo apt-get install libfontconfig-dev
       if: matrix.os == 'ubuntu-24.04'  #Ugly hack, hopefully temporary
     - name: Build
       run: cargo build --verbose
