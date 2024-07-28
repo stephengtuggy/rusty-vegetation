@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
-  ]
+  ],
+  "addLabels": [
+    "dependencies"
+  ],
+  "additionalReviewers": [
+    "stephengtuggy"
+  ],
+  "assigneesFromCodeOwners": true,
+  "reviewersFromCodeOwners": true
 }
