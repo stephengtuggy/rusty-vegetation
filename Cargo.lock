@@ -1003,9 +1003,9 @@ dependencies = [
 
 [[package]]
 name = "is-odd"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5741cc4ac9f6105f6bb067d09bb5685dc255e5bdec6f3bf6d86f4bda6187d17e"
+checksum = "774d9618121c276cc7a8d08e30bef03dda2c39708773fd937aa2452ba8ed9243"
 
 [[package]]
 name = "is_terminal_polyfill"
