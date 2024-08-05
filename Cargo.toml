@@ -1,18 +1,18 @@
 [package]
 name = "rusty-vegetation"
-version = "0.3.3"
+version = "0.4.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.25.0"
-winit = "0.27.5"
+image = "0.25.2"
+winit = "0.30.4"
 cgmath = "0.18.0"
-env_logger = "0.11.0"
-log = "0.4.21"
+env_logger = "0.11.5"
+log = "0.4.22"
 wgpu = "0.17.2"
 pollster = "0.3.0"
 bytemuck = { version = "1.12.2", features = [ "derive" ] }
 random-number = "0.1.8"
-is-odd = "1.0.0"
+is-odd = "1.1.0"

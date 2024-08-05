@@ -8,12 +8,16 @@ use cgmath::num_traits::Pow;
 use wgpu::TextureFormat;
 
 use winit::{
+    application::ApplicationHandler,
     event::*,
-    event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    event_loop::{ControlFlow, EventLoop, ActiveEventLoop},
+    keyboard::NamedKey,
+    window::{Window, WindowAttributes, WindowId},
 };
 
 use wgpu::util::DeviceExt;
+use winit::error::OsError;
+use winit::keyboard::Key;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -385,6 +389,61 @@ impl State {
     }
 }
 
+#[derive(Default)]
+struct App {
+    window: Option<Window>,
+    state: Option<State>,
+    tree_generator: Option<TreeGenerator>,
+}
+
+impl ApplicationHandler for App {
+    fn resumed(&mut self, event_loop: &ActiveEventLoop) {
+        let mut window_result = event_loop.create_window(Window::default_attributes().with_title("Tree Generator"));
+        let window_unwrapped: &mut Window;
+        let window_option: Option<&mut Window>;
+        match window_result.as_mut() {
+            Ok(v) => {
+                window_unwrapped = v;
+                window_option = Some(v);
+                self.window = window_option.as_deref_mut();
+            }
+            Err(_) => {}
+        }
+        self.tree_generator = Some(TreeGenerator::new(9, 75, 1, 0.000651041666667, 0.0009765625));
+        self.state = Some(pollster::block_on(State::new(&self.window, &mut self.tree_generator)));
+    }
+
+    fn window_event(&mut self, event_loop: &ActiveEventLoop, window_id: WindowId, event: WindowEvent) {
+        match event {
+            WindowEvent::Resized(_) => {
+                let window_temp = &mut self.window;
+                &self.state.unwrap().resize((&self).window.unwrap().inner_size());
+            }
+            WindowEvent::Moved(_) => {}
+            WindowEvent::CloseRequested => {
+                event_loop.exit();
+            }
+            WindowEvent::Destroyed => {}
+            WindowEvent::KeyboardInput { event, .. } => {
+                match event.state {
+                    ElementState::Pressed => {
+                        match event.logical_key {
+                            Key::Named(NamedKey::Escape) => {
+                                event_loop.exit();
+                            }
+                            _ => {}
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            WindowEvent::ScaleFactorChanged { .. } => {}
+            WindowEvent::RedrawRequested => {}
+            _ => {}
+        }
+    }
+}
+
 fn main() {
     env_logger::init();
 
@@ -396,8 +455,8 @@ fn main() {
     let vertical_scale = f32::from_str(&args[5]).unwrap();
     let mut tree_generator = TreeGenerator::new(fractal_level, completeness_factor, num_trees, horizontal_scale, vertical_scale);
 
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
+    let event_loop = EventLoop::new().unwrap();
+    let window = event_loop.create_window(Default::default()).unwrap();
 
     // State::new uses async code, so we're going to wait for it to finish
     let mut state: State = pollster::block_on(State::new(&window, &mut tree_generator));
