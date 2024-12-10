@@ -12,7 +12,7 @@ cgmath = "0.18.0"
 env_logger = "0.11.0"
 log = "0.4.21"
 wgpu = "0.17.2"
-pollster = "0.3.0"
+pollster = "0.4.0"
 bytemuck = { version = "1.12.2", features = [ "derive" ] }
 random-number = "0.1.8"
 is-odd = "1.0.0"
