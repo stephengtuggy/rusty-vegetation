@@ -8,8 +8,6 @@ updates:
     allow:
       # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
-    reviewers:
-      - "stephengtuggy"
     open-pull-requests-limit: 3
   
   - package-ecosystem: "cargo"
@@ -22,6 +20,4 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-    reviewers:
-      - "stephengtuggy"
     open-pull-requests-limit: 3
