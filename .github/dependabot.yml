@@ -4,19 +4,24 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "monthly"
+      interval: "weekly"
     allow:
       # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
+    reviewers:
+      - "stephengtuggy"
+    open-pull-requests-limit: 3
   
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
     allow:
       # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    reviewers:
+      - "stephengtuggy"
+    open-pull-requests-limit: 3
