@@ -754,9 +754,9 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "indexmap"
-version = "1.9.2"
+version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
+checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.3",
@@ -967,7 +967,7 @@ dependencies = [
  "bitflags 2.5.0",
  "codespan-reporting",
  "hexf-parse",
- "indexmap 1.9.2",
+ "indexmap 1.9.3",
  "log",
  "num-traits",
  "rustc-hash",
