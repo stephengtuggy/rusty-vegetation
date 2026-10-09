@@ -19,19 +19,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, windows-2025-vs2026, ubuntu-22.04, ubuntu-24.04, macos-15, macos-26 ]
+        os: [ windows-2022, windows-2025-vs2026, ubuntu-22.04, ubuntu-24.04, ubuntu-26.04, macos-15, macos-26 ]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Install prereqs
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo apt-get update
-        sudo apt-get install libfontconfig-dev
-      if: matrix.os == 'ubuntu-24.04'  #Ugly hack, hopefully temporary
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install prereqs
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install libfontconfig-dev
+        if: matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-26.04'
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
