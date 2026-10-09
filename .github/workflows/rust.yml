@@ -30,7 +30,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libfontconfig-dev
-        if: matrix.os == 'ubuntu-24.04'  #Ugly hack, hopefully temporary
+        if: matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-26.04'
       - name: Build
         run: cargo build --verbose
       - name: Run tests
